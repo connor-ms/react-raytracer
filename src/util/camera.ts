@@ -5,7 +5,7 @@ import { Vec3 } from "./vector";
 
 export default class Camera {
     public imageHeight;
-    private center;
+    private center; // Camera position
     private pixelOrigin; // Location of pixel 0, 0
     private pixelDeltaU; // Offset to pixel to the right
     private pixelDeltaV; // Offset to pixel below
@@ -17,7 +17,6 @@ export default class Camera {
         let focalLength = 1;
         let viewportHeight = 2;
         let viewportWidth = viewportHeight * (this.imageWidth / this.imageHeight);
-        let samples_per_pixel = 10;
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
         let viewportU = new Vec3(viewportWidth, 0, 0);
@@ -35,28 +34,28 @@ export default class Camera {
     public render(world: Hittable, imageData: ImageData) {
         for (let y = 0; y < this.imageHeight; y++) {
             for (let x = 0; x < this.imageWidth; x++) {
-                let pixel_center = this.pixelOrigin.add(this.pixelDeltaU.scale(x)).add(this.pixelDeltaV.scale(y));
+                let pixelCenter = this.pixelOrigin.add(this.pixelDeltaU.scale(x)).add(this.pixelDeltaV.scale(y));
 
-                let ray_direction = pixel_center.subtract(this.center);
-                let ray = new Ray(this.center, ray_direction);
+                let rayDirection = pixelCenter.subtract(this.center);
+                let ray = new Ray(this.center, rayDirection);
 
-                let pixel_color = this.rayColor(ray, world);
+                let pixelColor = this.rayColor(ray, world);
 
-                this.setPixel(imageData.data, x, y, pixel_color);
+                this.setPixel(imageData.data, x, y, pixelColor);
             }
         }
     }
 
     private rayColor(r: Ray, world: Hittable) {
         // Hittable objects
-        let hit_rec = new HitRecord();
-        if (world.hit(r, new Interval(0, Infinity), hit_rec)) {
-            return hit_rec.normal.add(new Vec3(1, 1, 1)).scale(0.5);
+        let hitRec = new HitRecord();
+        if (world.hit(r, new Interval(0, Infinity), hitRec)) {
+            return hitRec.normal.add(new Vec3(1, 1, 1)).scale(0.5);
         }
 
         // Background
-        let unit_direction = r.direction.normalize();
-        let a = 0.5 * (unit_direction.y + 1.0);
+        let unitDirection = r.direction.normalize();
+        let a = 0.5 * (unitDirection.y + 1.0);
         return new Vec3(1.0, 1.0, 1.0).scale(1.0 - a).add(new Vec3(0.5, 0.7, 1.0).scale(a));
     }
 

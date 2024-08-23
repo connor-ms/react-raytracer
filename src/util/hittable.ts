@@ -6,28 +6,28 @@ export class HitRecord {
     public p: Vec3;
     public normal: Vec3;
     public t: number;
-    public front_face: boolean;
+    public frontFace: boolean;
 
     constructor() {
         this.p = new Vec3();
         this.normal = new Vec3();
         this.t = 0;
-        this.front_face = true;
+        this.frontFace = true;
     }
 
-    set_face_normal(r: Ray, outward_normal: Vec3) {
+    setFaceNormal(r: Ray, outward_normal: Vec3) {
         // Sets the hit record normal vector.
         // NOTE: the parameter `outward_normal` is assumed to have unit length.
 
-        this.front_face = r.direction.dot(outward_normal) < 0;
-        this.normal = this.front_face ? outward_normal : outward_normal.scale(-1);
+        this.frontFace = r.direction.dot(outward_normal) < 0;
+        this.normal = this.frontFace ? outward_normal : outward_normal.scale(-1);
     }
 
     set(other: HitRecord) {
         this.p = other.p;
         this.normal = other.normal;
         this.t = other.t;
-        this.front_face = other.front_face;
+        this.frontFace = other.frontFace;
     }
 }
 
@@ -40,7 +40,7 @@ export class Sphere implements Hittable {
         this.radius = Math.max(0, radius);
     }
 
-    hit(ray: Ray, ray_t: Interval, hit_record: HitRecord) {
+    hit(ray: Ray, ray_t: Interval, hitRec: HitRecord) {
         let oc = this.center.subtract(ray.origin);
         let a = ray.direction.length2();
         let h = ray.direction.dot(oc);
@@ -57,11 +57,10 @@ export class Sphere implements Hittable {
             if (!ray_t.surrounds(root)) return false;
         }
 
-        hit_record.t = root;
-        hit_record.p = ray.at(hit_record.t);
+        hitRec.t = root;
+        hitRec.p = ray.at(hitRec.t);
 
-        let outward_normal = hit_record.p.subtract(this.center).divide(this.radius);
-        hit_record.set_face_normal(ray, outward_normal);
+        hitRec.setFaceNormal(ray, hitRec.p.subtract(this.center).divide(this.radius));
 
         return true;
     }
@@ -88,19 +87,19 @@ export class HittableList extends Hittable {
         this.objects = [];
     }
 
-    hit(ray: Ray, ray_t: Interval, hit_record: HitRecord) {
-        let temp_rec: HitRecord = new HitRecord();
-        let hit_anything = false;
-        let closest_so_far = ray_t.max;
+    hit(ray: Ray, ray_t: Interval, hitRec: HitRecord) {
+        let temp: HitRecord = new HitRecord();
+        let hasHit = false;
+        let closest = ray_t.max;
 
         for (const object of this.objects) {
-            if (object.hit(ray, new Interval(ray_t.min, closest_so_far), temp_rec)) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                hit_record.set(temp_rec);
+            if (object.hit(ray, new Interval(ray_t.min, closest), temp)) {
+                hasHit = true;
+                closest = temp.t;
+                hitRec.set(temp);
             }
         }
 
-        return hit_anything;
+        return hasHit;
     }
 }
