@@ -5,12 +5,22 @@ export class Vec2 {
 export class Vec3 {
     constructor(public x: number = 0, public y: number = 0, public z: number = 0) {}
 
+    set(other: Vec3) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+    }
+
     add(other: Vec3) {
         return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
     }
 
     subtract(other: Vec3) {
         return new Vec3(this.x - other.x, this.y - other.y, this.z - other.z);
+    }
+
+    multiply(other: Vec3) {
+        return new Vec3(this.x * other.x, this.y * other.y, this.z * other.z);
     }
 
     scale(val: number) {
@@ -36,6 +46,15 @@ export class Vec3 {
 
     dot(other: Vec3) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
+    }
+
+    nearZero() {
+        let s = 1e-8;
+        return Math.abs(this.x) < s && Math.abs(this.y) < s && Math.abs(this.z) < s;
+    }
+
+    reflect(other: Vec3) {
+        return this.subtract(other.scale(this.dot(other) * 2));
     }
 
     static random(min?: number, max?: number) {

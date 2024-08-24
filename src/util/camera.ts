@@ -83,9 +83,15 @@ export default class Camera {
         if (world.hit(r, new Interval(0.01, Infinity), hitRec)) {
             //return hitRec.normal.add(new Vec3(1, 1, 1)).scale(0.5);
 
+            let scattered = new Ray(new Vec3(), new Vec3());
+            let attenuation = new Vec3();
+            if (hitRec.material?.scatter(r, hitRec, attenuation, scattered)) {
+                return this.rayColor(scattered, depth - 1, world).multiply(attenuation);
+            }
             //let direction = Vec3.randomOnHemisphere(hitRec.normal); // Not really accurate reflection
-            let direction = hitRec.normal.add(Vec3.randomUnitSphere().normalize()); // True Lambertian Reflection
-            return this.rayColor(new Ray(hitRec.p, direction), depth - 1, world).scale(0.5);
+            // let direction = hitRec.normal.add(Vec3.randomUnitSphere().normalize()); // True Lambertian Reflection
+            // return this.rayColor(new Ray(hitRec.p, direction), depth - 1, world).scale(0.5);
+            return new Vec3(0, 0, 0);
         }
 
         // Background

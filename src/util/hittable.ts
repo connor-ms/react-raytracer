@@ -1,10 +1,12 @@
 import Interval from "./interval";
+import { Material } from "./material";
 import { Ray } from "./ray";
 import { Vec3 } from "./vector";
 
 export class HitRecord {
     public p: Vec3;
     public normal: Vec3;
+    public material?: Material;
     public t: number;
     public frontFace: boolean;
 
@@ -28,6 +30,7 @@ export class HitRecord {
         this.normal = other.normal;
         this.t = other.t;
         this.frontFace = other.frontFace;
+        this.material = other.material;
     }
 }
 
@@ -36,7 +39,7 @@ export abstract class Hittable {
 }
 
 export class Sphere implements Hittable {
-    constructor(public center: Vec3, public radius: number) {
+    constructor(public center: Vec3, public radius: number, public material: Material) {
         this.radius = Math.max(0, radius);
     }
 
@@ -59,8 +62,8 @@ export class Sphere implements Hittable {
 
         hitRec.t = root;
         hitRec.p = ray.at(hitRec.t);
-
         hitRec.setFaceNormal(ray, hitRec.p.subtract(this.center).divide(this.radius));
+        hitRec.material = this.material;
 
         return true;
     }

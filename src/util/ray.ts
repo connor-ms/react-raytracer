@@ -6,4 +6,9 @@ export class Ray {
     at(t: number) {
         return this.origin.add(this.direction.scale(t));
     }
+
+    set(other: Ray) {
+        this.origin = other.origin;
+        this.direction = other.direction;
+    }
 }
