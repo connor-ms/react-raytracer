@@ -4,15 +4,26 @@ import { Ray } from "./ray";
 import { Vec3 } from "./vector";
 
 export default class Camera {
+    public imageWidth;
     public imageHeight;
+    public aspectRatio;
+    public antialias;
+
     private center; // Camera position
     private pixelOrigin; // Location of pixel 0, 0
     private pixelDeltaU; // Offset to pixel to the right
     private pixelDeltaV; // Offset to pixel below
+    private samplesPerPixel;
 
-    constructor(public imageWidth: number, public aspectRatio: number) {
+    constructor(imageWidth: number, aspectRatio: number) {
+        this.aspectRatio = aspectRatio;
+        this.imageWidth = imageWidth;
         this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.aspectRatio));
         this.center = new Vec3();
+
+        this.antialias = false;
+        // Only used if antialiasing is enabled
+        this.samplesPerPixel = 10;
 
         let focalLength = 1;
         let viewportHeight = 2;
@@ -34,16 +45,32 @@ export default class Camera {
     public render(world: Hittable, imageData: ImageData) {
         for (let y = 0; y < this.imageHeight; y++) {
             for (let x = 0; x < this.imageWidth; x++) {
-                let pixelCenter = this.pixelOrigin.add(this.pixelDeltaU.scale(x)).add(this.pixelDeltaV.scale(y));
+                let pixelColor = new Vec3();
+                let r = this.getRay(x, y);
 
-                let rayDirection = pixelCenter.subtract(this.center);
-                let ray = new Ray(this.center, rayDirection);
-
-                let pixelColor = this.rayColor(ray, world);
+                if (this.antialias) {
+                    for (let sample = 0; sample < this.samplesPerPixel; sample++) {
+                        r = this.getRay(x, y);
+                        pixelColor = pixelColor.add(this.rayColor(r, world));
+                    }
+                    pixelColor = pixelColor.divide(this.samplesPerPixel);
+                } else {
+                    pixelColor = this.rayColor(r, world);
+                }
 
                 this.setPixel(imageData.data, x, y, pixelColor);
             }
         }
+    }
+
+    private getRay(x: number, y: number) {
+        let offset = new Vec3();
+
+        if (this.antialias) offset = new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
+
+        let pixelSample = this.pixelOrigin.add(this.pixelDeltaU.scale(x + offset.x)).add(this.pixelDeltaV.scale(y + offset.y));
+
+        return new Ray(this.center, pixelSample.subtract(this.center));
     }
 
     private rayColor(r: Ray, world: Hittable) {
