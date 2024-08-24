@@ -31,7 +31,7 @@ export class Renderer {
         let material_right = new Metal(new Vec3(0.8, 0.6, 0.2));
 
         this.world.add(new Sphere(new Vec3(0.0, -100.5, -1.0), 100.0, material_ground));
-        this.world.add(new Sphere(new Vec3(0.0, 0.0, -1.2), 0.5, material_center));
+        this.world.add(new Sphere(new Vec3(0.0, 0.0, -1.2), 0.2, material_center));
         this.world.add(new Sphere(new Vec3(-1.0, 0.0, -1.0), 0.5, material_left));
         this.world.add(new Sphere(new Vec3(1.0, 0.0, -1.0), 0.5, material_right));
 

@@ -1,13 +1,19 @@
 import Canvas from './components/Canvas'
-import './App.css'
+import Navbar from './components/Navbar'
+import Settings from './components/Settings'
 
-function App() {
+export default function App() {
   return (
     <>
-      <h1>react-raytracer</h1>
-      <Canvas />
+      <Navbar />
+      <div className="flex flex-col md:flex-row items-center justify-center min-h-screen p-4 space-y-4 md:space-y-0 md:space-x-4">
+        <div className="w-full md:w-1/2">
+          <Canvas />
+        </div>
+        <div className="w-50">
+          <Settings />
+        </div>
+      </div>
     </>
   )
 }
-
-export default App
