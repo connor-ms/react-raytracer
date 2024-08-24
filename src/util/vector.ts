@@ -37,4 +37,31 @@ export class Vec3 {
     dot(other: Vec3) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
+
+    static random(min?: number, max?: number) {
+        if (min && max) {
+            const getRandom = () => {
+                return Math.random() * (max - min) + min;
+            };
+
+            return new Vec3(getRandom(), getRandom(), getRandom());
+        } else {
+            return new Vec3(Math.random(), Math.random(), Math.random());
+        }
+    }
+
+    static randomUnitSphere() {
+        while (true) {
+            let p = Vec3.random(-1, 1);
+            if (p.length2() < 1) return p;
+        }
+    }
+
+    static randomOnHemisphere(normal: Vec3) {
+        let on_unit_sphere = Vec3.randomUnitSphere().normalize();
+        if (on_unit_sphere.dot(normal) > 0.0)
+            // In the same hemisphere as the normal
+            return on_unit_sphere;
+        else return on_unit_sphere.scale(-1);
+    }
 }

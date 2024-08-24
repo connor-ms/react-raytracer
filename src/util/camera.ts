@@ -14,16 +14,18 @@ export default class Camera {
     private pixelDeltaU; // Offset to pixel to the right
     private pixelDeltaV; // Offset to pixel below
     private samplesPerPixel;
+    private maxDepth;
 
     constructor(imageWidth: number, aspectRatio: number) {
         this.aspectRatio = aspectRatio;
         this.imageWidth = imageWidth;
         this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.aspectRatio));
         this.center = new Vec3();
+        this.maxDepth = 10;
 
-        this.antialias = false;
+        this.antialias = true;
         // Only used if antialiasing is enabled
-        this.samplesPerPixel = 10;
+        this.samplesPerPixel = 40;
 
         let focalLength = 1;
         let viewportHeight = 2;
@@ -51,11 +53,11 @@ export default class Camera {
                 if (this.antialias) {
                     for (let sample = 0; sample < this.samplesPerPixel; sample++) {
                         r = this.getRay(x, y);
-                        pixelColor = pixelColor.add(this.rayColor(r, world));
+                        pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
                     }
                     pixelColor = pixelColor.divide(this.samplesPerPixel);
                 } else {
-                    pixelColor = this.rayColor(r, world);
+                    pixelColor = this.rayColor(r, this.maxDepth, world);
                 }
 
                 this.setPixel(imageData.data, x, y, pixelColor);
@@ -73,11 +75,17 @@ export default class Camera {
         return new Ray(this.center, pixelSample.subtract(this.center));
     }
 
-    private rayColor(r: Ray, world: Hittable) {
+    private rayColor(r: Ray, depth: number, world: Hittable): Vec3 {
+        if (depth <= 0) return new Vec3(0, 0, 0);
+
         // Hittable objects
         let hitRec = new HitRecord();
-        if (world.hit(r, new Interval(0, Infinity), hitRec)) {
-            return hitRec.normal.add(new Vec3(1, 1, 1)).scale(0.5);
+        if (world.hit(r, new Interval(0.01, Infinity), hitRec)) {
+            //return hitRec.normal.add(new Vec3(1, 1, 1)).scale(0.5);
+
+            //let direction = Vec3.randomOnHemisphere(hitRec.normal); // Not really accurate reflection
+            let direction = hitRec.normal.add(Vec3.randomUnitSphere().normalize()); // True Lambertian Reflection
+            return this.rayColor(new Ray(hitRec.p, direction), depth - 1, world).scale(0.5);
         }
 
         // Background
