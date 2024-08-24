@@ -3,7 +3,10 @@ import './App.css'
 
 function App() {
   return (
-    <Canvas />
+    <>
+      <h1>react-raytracer</h1>
+      <Canvas />
+    </>
   )
 }
 

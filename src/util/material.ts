@@ -9,7 +9,7 @@ export abstract class Material {
 export class Lambertian implements Material {
     constructor(private albedo: Vec3) {}
 
-    scatter(rayIn: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray) {
+    scatter(_: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray) {
         let scatter_direction = hitRec.normal.add(Vec3.randomUnitSphere().normalize());
 
         if (scatter_direction.nearZero()) {

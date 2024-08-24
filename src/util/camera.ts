@@ -3,11 +3,16 @@ import Interval from "./interval";
 import { Ray } from "./ray";
 import { Vec3 } from "./vector";
 
+function degreesToRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+}
+
 export default class Camera {
     public imageWidth;
     public imageHeight;
     public aspectRatio;
-    public antialias;
+    public superSample;
+    public fov;
 
     private center; // Camera position
     private pixelOrigin; // Location of pixel 0, 0
@@ -22,13 +27,16 @@ export default class Camera {
         this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.aspectRatio));
         this.center = new Vec3();
         this.maxDepth = 10;
+        this.fov = 90;
 
-        this.antialias = true;
-        // Only used if antialiasing is enabled
+        this.superSample = false;
+        // Only used if supersampling is enabled
         this.samplesPerPixel = 40;
 
         let focalLength = 1;
-        let viewportHeight = 2;
+        let theta = degreesToRadians(this.fov);
+        let h = Math.tan(theta / 2);
+        let viewportHeight = 2 * h * focalLength;
         let viewportWidth = viewportHeight * (this.imageWidth / this.imageHeight);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
@@ -50,7 +58,7 @@ export default class Camera {
                 let pixelColor = new Vec3();
                 let r = this.getRay(x, y);
 
-                if (this.antialias) {
+                if (this.superSample) {
                     for (let sample = 0; sample < this.samplesPerPixel; sample++) {
                         r = this.getRay(x, y);
                         pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
@@ -68,7 +76,7 @@ export default class Camera {
     private getRay(x: number, y: number) {
         let offset = new Vec3();
 
-        if (this.antialias) offset = new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
+        if (this.superSample) offset = new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
 
         let pixelSample = this.pixelOrigin.add(this.pixelDeltaU.scale(x + offset.x)).add(this.pixelDeltaV.scale(y + offset.y));
 
