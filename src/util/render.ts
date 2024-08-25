@@ -10,16 +10,12 @@ export interface Settings {
 
 export class Renderer {
     private frameTime: number;
-    private frameCount: number;
-    private single: boolean;
 
     private world: HittableList;
     public cam: Camera;
 
     constructor() {
         this.frameTime = 0;
-        this.frameCount = 0;
-        this.single = false;
 
         this.world = new HittableList();
         // this.world.add(new Sphere(new Vec3(0, 0, -1), 0.5));
@@ -38,9 +34,7 @@ export class Renderer {
         this.cam = new Camera(700, 16 / 9);
     }
 
-    buildFrame(ctx: CanvasRenderingContext2D, frameCount: number) {
-        if (this.single) return;
-
+    buildFrame(ctx: CanvasRenderingContext2D) {
         let startTime = performance.now();
 
         const imageData = ctx.createImageData(this.cam.imageWidth, this.cam.imageHeight);
@@ -49,17 +43,8 @@ export class Renderer {
 
         ctx.putImageData(imageData, 0, 0);
 
-        this.frameTime += performance.now() - startTime;
-        this.frameCount++;
+        this.frameTime = performance.now() - startTime;
 
         console.log(`Rendered in ${this.frameTime}ms`);
-
-        if (this.frameCount === 50) {
-            console.log("Average frametime: " + this.frameTime / this.frameCount);
-            this.frameTime = 0;
-            this.frameCount = 0;
-        }
-
-        this.single = true;
     }
 }

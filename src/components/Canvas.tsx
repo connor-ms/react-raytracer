@@ -1,10 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Renderer } from '../util/render';
 
 const Canvas: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const requestRef = useRef<number>(0);
-
     const renderer = new Renderer();
 
     const render = () => {
@@ -12,19 +10,20 @@ const Canvas: React.FC = () => {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                renderer.buildFrame(ctx, requestRef.current);
+                renderer.buildFrame(ctx);
             }
         }
-        requestRef.current = requestAnimationFrame(render);
     };
 
     useEffect(() => {
-        requestRef.current = requestAnimationFrame(render);
-        return () => cancelAnimationFrame(requestRef.current);
-    }, []);
+        render();
+    })
 
     return (
-        <canvas ref={canvasRef} width={renderer.cam.imageWidth} height={renderer.cam.imageHeight} />
+        <div className={`flex flex-col items-center w-[${renderer.cam.imageWidth}px]`}>
+            <canvas ref={canvasRef} width={renderer.cam.imageWidth} height={renderer.cam.imageHeight} />
+            <button className="btn btn-primary mt-3" onClick={render}>Render</button>
+        </div>
     );
 };
 
