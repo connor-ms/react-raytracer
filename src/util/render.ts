@@ -9,10 +9,9 @@ export interface Settings {
 }
 
 export class Renderer {
-    private frameTime: number;
-
-    private world: HittableList;
+    public world: HittableList;
     public cam: Camera;
+    public frameTime: number;
 
     constructor() {
         this.frameTime = 0;
@@ -42,9 +41,8 @@ export class Renderer {
         this.cam.render(this.world, imageData);
 
         ctx.putImageData(imageData, 0, 0);
+        console.log(this.cam.fov);
 
         this.frameTime = performance.now() - startTime;
-
-        console.log(`Rendered in ${this.frameTime}ms`);
     }
 }

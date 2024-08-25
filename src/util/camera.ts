@@ -18,7 +18,7 @@ export default class Camera {
     private pixelOrigin; // Location of pixel 0, 0
     private pixelDeltaU; // Offset to pixel to the right
     private pixelDeltaV; // Offset to pixel below
-    private samplesPerPixel;
+    public samplesPerPixel;
     private maxDepth;
 
     constructor(imageWidth: number, aspectRatio: number) {
@@ -31,8 +31,14 @@ export default class Camera {
 
         this.superSample = false;
         // Only used if supersampling is enabled
-        this.samplesPerPixel = 40;
+        this.samplesPerPixel = 10;
 
+        this.pixelOrigin = new Vec3();
+        this.pixelDeltaU = new Vec3();
+        this.pixelDeltaV = new Vec3();
+    }
+
+    public render(world: Hittable, imageData: ImageData) {
         let focalLength = 1;
         let theta = degreesToRadians(this.fov);
         let h = Math.tan(theta / 2);
@@ -50,9 +56,7 @@ export default class Camera {
         // Calculate the location of the upper left pixel.
         let viewportOrigin = this.center.subtract(new Vec3(0, 0, focalLength)).subtract(viewportU.divide(2)).subtract(viewportV.divide(2));
         this.pixelOrigin = viewportOrigin.add(this.pixelDeltaU.add(this.pixelDeltaV).divide(2));
-    }
 
-    public render(world: Hittable, imageData: ImageData) {
         for (let y = 0; y < this.imageHeight; y++) {
             for (let x = 0; x < this.imageWidth; x++) {
                 let pixelColor = new Vec3();
@@ -71,6 +75,10 @@ export default class Camera {
                 this.setPixel(imageData.data, x, y, pixelColor);
             }
         }
+    }
+
+    public totalSamples() {
+        return this.superSample ? this.imageWidth * this.imageHeight * this.samplesPerPixel : this.imageWidth * this.imageHeight;
     }
 
     private getRay(x: number, y: number) {

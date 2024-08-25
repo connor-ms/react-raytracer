@@ -1,23 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { Renderer } from '../util/render';
 
-const Canvas: React.FC = () => {
+interface CanvasProps {
+    renderer: Renderer;
+    onRender: (ctx: CanvasRenderingContext2D) => void;
+}
+
+const Canvas: React.FC<CanvasProps> = ({ renderer, onRender }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const renderer = new Renderer();
 
     const render = () => {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                renderer.buildFrame(ctx);
+                onRender(ctx);
             }
         }
     };
 
-    useEffect(() => {
-        render();
-    })
+    useEffect(render, []);
 
     return (
         <div className={`flex flex-col items-center w-[${renderer.cam.imageWidth}px]`}>
