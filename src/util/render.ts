@@ -3,11 +3,6 @@ import { HittableList, Sphere } from "./hittable";
 import { Lambertian, Metal } from "./material";
 import { Vec3 } from "./vector";
 
-export interface Settings {
-    viewHeight: number;
-    viewWidth: number;
-}
-
 export class Renderer {
     public world: HittableList;
     public cam: Camera;
@@ -33,15 +28,10 @@ export class Renderer {
         this.cam = new Camera(700, 16 / 9);
     }
 
-    buildFrame(ctx: CanvasRenderingContext2D) {
+    buildFrame(imageData: ImageData) {
         let startTime = performance.now();
 
-        const imageData = ctx.createImageData(this.cam.imageWidth, this.cam.imageHeight);
-
         this.cam.render(this.world, imageData);
-
-        ctx.putImageData(imageData, 0, 0);
-        console.log(this.cam.fov);
 
         this.frameTime = performance.now() - startTime;
     }

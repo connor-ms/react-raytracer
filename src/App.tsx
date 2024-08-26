@@ -8,9 +8,7 @@ export default function App() {
   const [renderer] = useState(() => new Renderer());
   const [renderCount, setRenderCount] = useState(0);
 
-  const handleRender = (ctx: CanvasRenderingContext2D) => {
-    renderer.buildFrame(ctx);
-
+  const handleRender = () => {
     setRenderCount(renderCount + 1);
   }
 

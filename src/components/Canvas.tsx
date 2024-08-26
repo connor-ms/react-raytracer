@@ -3,7 +3,7 @@ import { Renderer } from '../util/render';
 
 interface CanvasProps {
     renderer: Renderer;
-    onRender: (ctx: CanvasRenderingContext2D) => void;
+    onRender: () => void;
 }
 
 const Canvas: React.FC<CanvasProps> = ({ renderer, onRender }) => {
@@ -14,7 +14,12 @@ const Canvas: React.FC<CanvasProps> = ({ renderer, onRender }) => {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                onRender(ctx);
+                const imageData = ctx.getImageData(0, 0, renderer.cam.imageWidth, renderer.cam.imageHeight);
+                renderer.buildFrame(imageData);
+                ctx.putImageData(imageData, 0, 0);
+
+                // Update state to rerender settings component
+                onRender();
             }
         }
     };
