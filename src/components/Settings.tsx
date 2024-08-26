@@ -1,9 +1,43 @@
 import { useState } from "react";
 import { Renderer } from "../util/render";
+import { Sphere } from "../util/hittable";
 
 interface SettingsProps {
     renderer: Renderer;
     renderCount: number;
+}
+
+const ObjectSettings: React.FC<{ object: Sphere; index: number; }> = ({ object, index }) => {
+    const [_, setDummyState] = useState(false); // Dummy state to force rerender
+
+    return (
+        <div className="collapse collapse-arrow bg-base-200 mt-1">
+            <input type="checkbox" />
+            <div className="collapse-title text-xl font-medium">Object {index}</div>
+            <div className="collapse-content label-text">
+                <label className="input input-bordered flex items-center gap-1 h-10">
+                    Radius:
+                    <input type="number" min="0" step="0.1" className="grow" value={object.radius} onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.radius = Number.parseFloat(event.target.value); setDummyState(prev => !prev) }} />
+                </label>
+                r: {Math.floor(object.material.albedo.x * 256)}
+                <input type="range" min="0" max="1" step="0.01" value={object.material.albedo.x} className="range range-xs" onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.material.albedo.x = Number.parseFloat(event.target.value); setDummyState(prev => !prev); }} />
+                g: {Math.floor(object.material.albedo.y * 256)}
+                <input type="range" min="0" max="1" step="0.01" value={object.material.albedo.y} className="range range-xs" onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.material.albedo.y = Number.parseFloat(event.target.value); setDummyState(prev => !prev); }} />
+                b: {Math.floor(object.material.albedo.z * 256)}
+                <input type="range" min="0" max="1" step="0.01" value={object.material.albedo.z} className="range range-xs" onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.material.albedo.z = Number.parseFloat(event.target.value); setDummyState(prev => !prev); }} />
+                <label className="input input-bordered flex items-center gap-1 h-10">
+                    x:
+                    <input type="number" className="grow" value={object.center.x} onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.center.x = Number.parseFloat(event.target.value); setDummyState(prev => !prev) }} />
+                </label><label className="input input-bordered flex items-center gap-1 h-10">
+                    y:
+                    <input type="number" className="grow" value={object.center.y} onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.center.y = Number.parseFloat(event.target.value); setDummyState(prev => !prev) }} />
+                </label><label className="input input-bordered flex items-center gap-1 h-10">
+                    z:
+                    <input type="number" className="grow" value={object.center.z} onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.center.z = Number.parseFloat(event.target.value); setDummyState(prev => !prev) }} />
+                </label>
+            </div>
+        </div>
+    )
 }
 
 const Settings: React.FC<SettingsProps> = ({ renderer }) => {
@@ -43,24 +77,18 @@ const Settings: React.FC<SettingsProps> = ({ renderer }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="collapse collapse-arrow join-item border-base-300 border">
+                    {/* <div className="collapse collapse-arrow join-item border-base-300 border">
                         <input type="radio" name="accordian" />
                         <div className="collapse-title text-xl font-medium">World</div>
                         <div className="collapse-content">
                             <p>hello</p>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="collapse collapse-arrow join-item border-base-300 border">
                         <input type="radio" name="accordian" />
                         <div className="collapse-title text-xl font-medium">Objects</div>
                         <div className="collapse-content">
-                            <div className="collapse collapse-arrow bg-base-200">
-                                <input type="checkbox" />
-                                <div className="collapse-title text-xl font-medium">Object 1</div>
-                                <div className="collapse-content">
-                                    <p>hello</p>
-                                </div>
-                            </div>
+                            {renderer.world.objects.map((hittable, index) => { return <ObjectSettings object={hittable as Sphere} index={index} /> })}
                             <div className="text-center">
                                 <button className="btn btn-primary btn-xs mt-2" onClick={() => { alert("Yoohoo!") }}>+</button>
                             </div>
