@@ -58,7 +58,7 @@ const ObjectSettings: React.FC<{ object: Sphere; index: number; world: HittableL
                         z:
                         <input type="number" className="grow" value={object.center.z} onChange={(event: React.ChangeEvent<HTMLInputElement>) => { object.center.z = Number.parseFloat(event.target.value); setDummyState(prev => !prev) }} />
                     </label>
-                    <button className="btn btn-block" onClick={() => {
+                    <button className="btn btn-block btn-link" onClick={() => {
                         world.remove(index);
                         setDeleted(true);
                     }}>Delete</button>
