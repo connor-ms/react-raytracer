@@ -5,6 +5,7 @@ import { Vec3 } from "./vector";
 export abstract class Material {
     public abstract albedo: Vec3;
     abstract scatter(rayIn: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray): boolean;
+    abstract toString(): string;
 }
 
 export class Lambertian implements Material {
@@ -21,6 +22,10 @@ export class Lambertian implements Material {
         attenuation.set(this.albedo);
         return true;
     }
+
+    toString() {
+        return "Diffuse";
+    }
 }
 
 export class Metal implements Material {
@@ -31,5 +36,9 @@ export class Metal implements Material {
         rayOut.set(new Ray(hitRec.p, reflected));
         attenuation.set(this.albedo);
         return true;
+    }
+
+    toString() {
+        return "Metal";
     }
 }

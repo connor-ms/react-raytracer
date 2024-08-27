@@ -86,6 +86,10 @@ export class HittableList extends Hittable {
         this.objects.push(object);
     }
 
+    remove(index: number) {
+        delete this.objects[index];
+    }
+
     clear() {
         this.objects = [];
     }
@@ -96,7 +100,7 @@ export class HittableList extends Hittable {
         let closest = ray_t.max;
 
         for (const object of this.objects) {
-            if (object.hit(ray, new Interval(ray_t.min, closest), temp)) {
+            if (object && object.hit(ray, new Interval(ray_t.min, closest), temp)) {
                 hasHit = true;
                 closest = temp.t;
                 hitRec.set(temp);
