@@ -1,5 +1,5 @@
 import Interval from "./interval";
-import { Material } from "./material";
+import { Lambertian, Material, Metal } from "./material";
 import { Ray } from "./ray";
 import { Vec3 } from "./vector";
 
@@ -108,5 +108,25 @@ export class HittableList extends Hittable {
         }
 
         return hasHit;
+    }
+
+    static from(serialized: string) {
+        const parsedData = JSON.parse(serialized);
+        const hittableList = new HittableList();
+
+        parsedData.objects.forEach((obj: any) => {
+            let material: Material;
+
+            if (obj.material.type === "Metal") {
+                material = new Metal(new Vec3(obj.material.albedo.x, obj.material.albedo.y, obj.material.albedo.z));
+            } else {
+                material = new Lambertian(new Vec3(obj.material.albedo.x, obj.material.albedo.y, obj.material.albedo.z));
+            }
+
+            const center = new Vec3(obj.center.x, obj.center.y, obj.center.z);
+            hittableList.add(new Sphere(center, obj.radius, material));
+        });
+
+        return hittableList;
     }
 }

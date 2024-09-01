@@ -4,12 +4,16 @@ import { Vec3 } from "./vector";
 
 export abstract class Material {
     public abstract albedo: Vec3;
+    public abstract type: string;
     abstract scatter(rayIn: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray): boolean;
-    abstract toString(): string;
 }
 
 export class Lambertian implements Material {
-    constructor(public albedo: Vec3) {}
+    public type: string;
+
+    constructor(public albedo: Vec3) {
+        this.type = "Diffuse";
+    }
 
     scatter(_: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray) {
         let scatter_direction = hitRec.normal.add(Vec3.randomUnitSphere().normalize());
@@ -22,23 +26,19 @@ export class Lambertian implements Material {
         attenuation.set(this.albedo);
         return true;
     }
-
-    toString() {
-        return "Diffuse";
-    }
 }
 
 export class Metal implements Material {
-    constructor(public albedo: Vec3) {}
+    public type: string;
+
+    constructor(public albedo: Vec3) {
+        this.type = "Metal";
+    }
 
     scatter(rayIn: Ray, hitRec: HitRecord, attenuation: Vec3, rayOut: Ray) {
         let reflected = rayIn.direction.reflect(hitRec.normal);
         rayOut.set(new Ray(hitRec.p, reflected));
         attenuation.set(this.albedo);
         return true;
-    }
-
-    toString() {
-        return "Metal";
     }
 }

@@ -8,37 +8,45 @@ function degreesToRadians(degrees: number): number {
 }
 
 export default class Camera {
-    public imageWidth;
-    public imageHeight;
-    public aspectRatio;
-    public superSample;
-    public fov;
-
-    private center; // Camera position
     private pixelOrigin; // Location of pixel 0, 0
     private pixelDeltaU; // Offset to pixel to the right
     private pixelDeltaV; // Offset to pixel below
-    public samplesPerPixel;
-    private maxDepth;
 
-    constructor(imageWidth: number, aspectRatio: number) {
-        this.aspectRatio = aspectRatio;
-        this.imageWidth = imageWidth;
-        this.imageHeight = Math.max(1, Math.round(this.imageWidth / this.aspectRatio));
-        this.center = new Vec3();
-        this.maxDepth = 10;
-        this.fov = 90;
-
-        this.superSample = false;
-        // Only used if supersampling is enabled
-        this.samplesPerPixel = 10;
-
+    constructor(
+        public imageWidth: number,
+        public imageHeight: number,
+        public center: Vec3,
+        public maxDepth: number,
+        public fov: number,
+        public samplesPerPixel: number
+    ) {
         this.pixelOrigin = new Vec3();
         this.pixelDeltaU = new Vec3();
         this.pixelDeltaV = new Vec3();
     }
 
-    public render(world: Hittable, imageData: ImageData) {
+    static from(data: string): Camera {
+        const parsedData = JSON.parse(data);
+
+        return new Camera(
+            parsedData.imageWidth,
+            parsedData.imageHeight,
+            new Vec3(parsedData.center.x, parsedData.center.y, parsedData.center.z),
+            parsedData.maxDepth,
+            parsedData.fov,
+            parsedData.samplesPerPixel
+        );
+    }
+
+    public render(world: Hittable, from: number, to: number) {
+        if (to > this.imageHeight) {
+            console.warn(`Warning: Camera 'to' value out of bounds. Clamping from ${to} to ${this.imageHeight}.`);
+            to = this.imageHeight;
+        }
+
+        let byteCount = (to - from) * this.imageWidth;
+        let data = new Uint8ClampedArray(byteCount * 4);
+
         let focalLength = 1;
         let theta = degreesToRadians(this.fov);
         let h = Math.tan(theta / 2);
@@ -57,35 +65,30 @@ export default class Camera {
         let viewportOrigin = this.center.subtract(new Vec3(0, 0, focalLength)).subtract(viewportU.divide(2)).subtract(viewportV.divide(2));
         this.pixelOrigin = viewportOrigin.add(this.pixelDeltaU.add(this.pixelDeltaV).divide(2));
 
-        for (let y = 0; y < this.imageHeight; y++) {
+        for (let y = from; y < to; y++) {
             for (let x = 0; x < this.imageWidth; x++) {
                 let pixelColor = new Vec3();
                 let r = this.getRay(x, y);
 
-                if (this.superSample) {
-                    for (let sample = 0; sample < this.samplesPerPixel; sample++) {
-                        r = this.getRay(x, y);
-                        pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
-                    }
-                    pixelColor = pixelColor.divide(this.samplesPerPixel);
-                } else {
-                    pixelColor = this.rayColor(r, this.maxDepth, world);
+                for (let sample = 0; sample < this.samplesPerPixel; sample++) {
+                    r = this.getRay(x, y);
+                    pixelColor = pixelColor.add(this.rayColor(r, this.maxDepth, world));
                 }
+                pixelColor = pixelColor.divide(this.samplesPerPixel);
 
-                this.setPixel(imageData.data, x, y, pixelColor);
+                this.setPixel(data, x, y - from, pixelColor);
             }
         }
+
+        return data;
     }
 
     public totalSamples() {
-        return this.superSample ? this.imageWidth * this.imageHeight * this.samplesPerPixel : this.imageWidth * this.imageHeight;
+        return this.imageWidth * this.imageHeight * this.samplesPerPixel;
     }
 
     private getRay(x: number, y: number) {
-        let offset = new Vec3();
-
-        if (this.superSample) offset = new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
-
+        let offset = new Vec3(Math.random() - 0.5, Math.random() - 0.5, 0);
         let pixelSample = this.pixelOrigin.add(this.pixelDeltaU.scale(x + offset.x)).add(this.pixelDeltaV.scale(y + offset.y));
 
         return new Ray(this.center, pixelSample.subtract(this.center));
