@@ -115,6 +115,8 @@ export class HittableList extends Hittable {
         const hittableList = new HittableList();
 
         parsedData.objects.forEach((obj: any) => {
+            if (!obj) return;
+
             let material: Material;
 
             if (obj.material.type === "Metal") {

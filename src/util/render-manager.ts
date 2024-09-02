@@ -23,7 +23,7 @@ export default class RenderManager {
         }
 
         // Construct the default camera & scene
-        this.camera = new Camera(700, 396, new Vec3(), 10, 90, 100);
+        this.camera = new Camera(700, 396, new Vec3(), 10, 90, 1);
         this.world = new HittableList();
 
         // Add ground object
@@ -68,7 +68,7 @@ export default class RenderManager {
         this.hasWorkerFinished[event.data.index] = true;
 
         if (this.hasWorkerFinished.every((value) => value === true)) {
-            console.log("All workers finished in " + (performance.now() - this.startTime!) + "ms");
+            console.log("All workers finished in " + (performance.now() - this.startTime!) + "ms.");
         }
     }
 }

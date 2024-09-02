@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import RenderManager from '../util/render-manager';
 
-// interface CanvasProps {
-//     renderer: Renderer;
-//     onRender: () => void;
-// }
+interface CanvasProps {
+    renderManager: RenderManager;
+    //onRender: () => void;
+}
 
-const Canvas: React.FC = () => {
+const Canvas: React.FC<CanvasProps> = ({ renderManager }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const manager = new RenderManager(15);
 
     const render = () => {
         const canvas = canvasRef.current;
@@ -17,10 +16,10 @@ const Canvas: React.FC = () => {
             const ctx = canvas.getContext('2d');
 
             if (ctx) {
-                manager.setContext(ctx);
+                renderManager.setContext(ctx);
             }
 
-            manager.begin();
+            renderManager.begin();
         }
     }
 
@@ -28,7 +27,7 @@ const Canvas: React.FC = () => {
 
     return (
         <div className={`flex flex-col items-center text-center w-[700px]`}>
-            <canvas ref={canvasRef} width={manager.camera.imageWidth} height={manager.camera.imageHeight} />
+            <canvas ref={canvasRef} width={renderManager.camera.imageWidth} height={renderManager.camera.imageHeight} />
             <button className="btn btn-primary my-3" onClick={render}>Render</button>
         </div>
     );
