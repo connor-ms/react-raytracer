@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import RenderManager from '../util/render-manager';
 
 interface CanvasProps {
@@ -23,7 +23,7 @@ const Canvas: React.FC<CanvasProps> = ({ renderManager }) => {
         }
     }
 
-    //useEffect(render, []);
+    useEffect(render, []);
 
     return (
         <div className={`flex flex-col items-center text-center w-[700px]`}>
