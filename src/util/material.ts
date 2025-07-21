@@ -28,7 +28,7 @@ export class Lambertian implements Material {
         return true;
     }
 
-    emitted(u: number, v: number, p: Vec3) {
+    emitted(_u: number, _v: number, _p: Vec3) {
         return new Vec3();
     }
 }
@@ -47,7 +47,7 @@ export class Metal implements Material {
         return true;
     }
 
-    emitted(u: number, v: number, p: Vec3) {
+    emitted(_u: number, _v: number, _p: Vec3) {
         return new Vec3();
     }
 }
@@ -66,7 +66,7 @@ export class DiffuseLight implements Material {
         return true;
     }
 
-    emitted(u: number, v: number, p: Vec3) {
+    emitted(_u: number, _v: number, _p: Vec3) {
         return new Vec3();
     }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import RenderManager from '../util/render-manager';
 
 interface CanvasProps {
