@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RenderManager from "../util/render-manager";
 import { Vec3 } from "../util/vector";
 import { Sphere, HittableList } from "../util/hittable";
@@ -70,10 +70,21 @@ const ObjectSettings: React.FC<{ object: Sphere; index: number; world: HittableL
 const Settings: React.FC<SettingsProps> = ({ renderManager }) => {
     const [_, setDummyState] = useState(false); // Dummy state to force rerender
 
+    useEffect(() => {
+        renderManager.onRenderFinish = () => {
+            console.log("Render finished.");
+            setDummyState(prev => !prev);
+        }
+
+        return () => {
+            renderManager.onRenderFinish = undefined;
+        };
+    }, [renderManager]);
+
     return (
         <div>
             <div className="text-center label-text">
-                Resolution: {renderManager.camera.imageWidth}x{renderManager.camera.imageHeight} - Samples: {renderManager.camera.totalSamples()} - Render time: TODO
+                Resolution: {renderManager.camera.imageWidth}x{renderManager.camera.imageHeight} - Samples: {renderManager.camera.totalSamples()} - Render time: {renderManager.getCompletionTime()}ms
             </div>
             <div className="bg-primary-content text-white rounded-lg w-[500px] my-1">
                 <div className="join join-vertical w-full">
@@ -83,7 +94,7 @@ const Settings: React.FC<SettingsProps> = ({ renderManager }) => {
                         <div className="collapse-content label-text">
                             Resolution: {renderManager.camera.imageWidth}x{renderManager.camera.imageHeight}<br />
                             Total samples: {renderManager.camera.totalSamples()}<br />
-                            Render time: TODO<br />
+                            Render time: {renderManager.getCompletionTime()}ms<br />
                         </div>
                     </div>
                     <div className="collapse collapse-arrow join-item border-base-300 border">

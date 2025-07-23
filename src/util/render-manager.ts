@@ -9,8 +9,11 @@ export default class RenderManager {
 
     private workers: Worker[];
     private hasWorkerFinished: boolean[];
-    private startTime?: DOMHighResTimeStamp;
+    private startTime: DOMHighResTimeStamp;
+    private finishTime: DOMHighResTimeStamp;
     private context?: CanvasRenderingContext2D;
+
+    public onRenderFinish?: () => void;
 
     constructor(threadCount: number) {
         this.workers = new Array<Worker>(threadCount);
@@ -34,6 +37,9 @@ export default class RenderManager {
         this.world.add(new Sphere(new Vec3(-1.0, 0.0, -1.0), 0.5, new Metal(new Vec3(0.8, 0.8, 0.8))));
         // Add right sphere
         this.world.add(new Sphere(new Vec3(1.0, 0.0, -1.0), 0.5, new Metal(new Vec3(0.8, 0.6, 0.2))));
+
+        this.startTime = 0;
+        this.finishTime = 0;
     }
 
     setContext(context: CanvasRenderingContext2D) {
@@ -60,7 +66,7 @@ export default class RenderManager {
     }
 
     handleWorkerMessage(event: MessageEvent<{ index: number; data: Uint8ClampedArray; start: number; end: number }>) {
-        console.log(`Worker ${event.data.index} finished in ${performance.now() - this.startTime!}ms.`);
+        console.log(`Worker ${event.data.index} finished in ${performance.now() - this.startTime}ms.`);
 
         let imageData = new ImageData(event.data.data, this.camera.imageWidth);
         this.context!.putImageData(imageData, 0, event.data.start);
@@ -68,7 +74,13 @@ export default class RenderManager {
         this.hasWorkerFinished[event.data.index] = true;
 
         if (this.hasWorkerFinished.every((value) => value === true)) {
-            console.log("All workers finished in " + (performance.now() - this.startTime!) + "ms.");
+            this.finishTime = performance.now();
+            if (this.onRenderFinish) this.onRenderFinish();
+            console.log("All workers finished in " + this.getCompletionTime() + "ms.");
         }
+    }
+
+    getCompletionTime(): DOMHighResTimeStamp {
+        return this.finishTime - this.startTime;
     }
 }
